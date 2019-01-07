@@ -9,9 +9,9 @@ def cambiar_fw(valor):
 	f.close()
 	
 
-def getMACfromIP(ip,mi_ip):
-	pping=IP(dst=ip, src=mi_ip)/ICMP()
-	sendp(pping)
+def getMACfromIP(ip):
+	#Hacemos ping en segundo plano para poder capturar un paquete icmp del que extraer la direccion MAC asociada a la Ip introducida
+	os.system("ping -c 2 " + ip + " &"" > /dev/null 2>&1")
 	pcap=sniff(filter="icmp and host " + ip,count=1)
 	panalisis=pcap[0]
 
@@ -98,8 +98,11 @@ def menuCapa():
 
 
 menuForwarding()
-#arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
+getMACfromIP("10.0.2.1")
+
+
 arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
+#arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
 #getMACfromIP("10.0.2.4","10.0.2.15")
 #print("0)Dejar de enviar paquetes") 
 #sendp(p*1000,inter=1)
