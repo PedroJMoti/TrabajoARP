@@ -94,8 +94,11 @@ def menuCapa():
 		print(ip_obj)
 		#arpPoissoningCapa2()
 	elif (teclado == 1):
-		
+		print()
 
+
+menuForwarding()
+#arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
 arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
 #getMACfromIP("10.0.2.4","10.0.2.15")
 #print("0)Dejar de enviar paquetes") 
