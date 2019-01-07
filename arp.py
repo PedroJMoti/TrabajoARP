@@ -87,21 +87,29 @@ def menuCapa():
 	print("0)Capa 2")
 	print("1)Capa 3")
 	teclado = input()
+	salir=False
 
 	if  (teclado == 0):
-		print("Introduce la IP de objetivo")
-		ip_obj=teclado()
-		print(ip_obj)
-		#arpPoissoningCapa2()
+		ip_obj=	raw_input("Introduce la IP de objetivo")
+		ip_gate= raw_input("Introduce la IP del gateway")
+		arpPoissoningSoloIP(ip_obj,ip_gate)
+		
+		
 	elif (teclado == 1):
-		print()
+		print("Saliendo")
+		
+	else:
+		print("Entrada Incorrecta")
 
+def menu():
+	ip_obj=	raw_input("Introduce la IP de objetivo")
+	ip_gate= raw_input("Introduce la IP del gateway")
+	arpPoissoningSoloIP(ip_obj,ip_gate)
 
 menuForwarding()
-getMACfromIP("10.0.2.1")
-
-
-arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
+menu()
+#arpPoissoningSoloIP("10.0.2.4","10.0.2.1")
+#arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
 #arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
 #getMACfromIP("10.0.2.4","10.0.2.15")
 #print("0)Dejar de enviar paquetes") 
